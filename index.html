@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apple Wallet - Precision Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+        }
+
+        /* --- Seamless View Transition --- */
+        #wallet-container {
+            height: 100vh;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .view-details #wallet-container {
+            transform: translateY(-380px); /* Moves everything up */
+        }
+
+        /* --- Carousel Swiping (Mouse + Touch) --- */
+        .carousel-wrapper {
+            transition: opacity 0.4s ease;
+        }
+        .view-details .carousel-wrapper { opacity: 0; pointer-events: none; }
+
+        .carousel-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 12px;
+            padding: 10px 20px;
+            scrollbar-width: none;
+            cursor: grab;
+        }
+        .carousel-container:active { cursor: grabbing; }
+        .carousel-container::-webkit-scrollbar { display: none; }
+
+        .promo-card {
+            min-width: calc(100% - 40px);
+            aspect-ratio: 2/1.1;
+            background: #1c1c1e;
+            border-radius: 28px;
+            scroll-snap-align: center;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .dot-box {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 20px 0;
+        }
+        .dot { height: 7px; width: 7px; background: #3a3a3c; border-radius: 10px; transition: 0.3s; }
+        .dot.active { width: 22px; background: #fff; }
+
+        /* --- The Card --- */
+        .apple-cash-card {
+            width: 100%;
+            aspect-ratio: 1.58/1;
+            background: #080808;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        .dots-pattern {
+            position: absolute;
+            bottom: -30%; left: 50%; transform: translateX(-50%);
+            width: 140%; height: 120%;
+            background-image: radial-gradient(#7d48b1 2px, transparent 2px);
+            background-size: 16px 16px;
+            mask-image: radial-gradient(circle at 50% 100%, black 25%, transparent 75%);
+            -webkit-mask-image: radial-gradient(circle at 50% 100%, black 25%, transparent 75%);
+        }
+
+        /* --- Action Bar (Matching Buttons) --- */
+        .details-content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.5s 0.2s;
+            padding: 20px;
+        }
+        .view-details .details-content { opacity: 1; transform: translateY(0); }
+
+        .action-bar { display: flex; gap: 10px; align-items: stretch; margin-top: 20px; }
+        .balance-box {
+            background: #1c1c1e;
+            border-radius: 24px;
+            padding: 15px 20px;
+            flex-grow: 1;
+        }
+        .btn-pill {
+            background: #fff;
+            color: #000;
+            border-radius: 50px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* --- Full Keypad Mod --- */
+        #mod-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 40px 20px;
+        }
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: auto auto 20px auto;
+        }
+        .key {
+            background: #1c1c1e;
+            height: 75px;
+            width: 75px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .key:active { background: #3a3a3c; }
+    </style>
+</head>
+<body id="app-body">
+
+<div id="wallet-container">
+    <!-- Header -->
+    <div class="p-5 flex justify-between items-center" id="wallet-header">
+        <h1 class="text-4xl font-extrabold tracking-tight">Wallet</h1>
+        <div class="flex gap-2">
+            <i class="fas fa-plus bg-[#1c1c1e] p-3 rounded-full"></i>
+            <i class="fas fa-search bg-[#1c1c1e] p-3 rounded-full" onclick="alert('Search placeholder')"></i>
+        </div>
+    </div>
+
+    <!-- Carousel -->
+    <div class="carousel-wrapper">
+        <div class="carousel-container" id="carousel">
+            <div class="promo-card">
+                <div class="bg-white/10 w-fit px-3 py-1 rounded-md mb-2 text-xs font-bold uppercase"> Cash</div>
+                <h2 class="text-2xl font-bold">Welcome to Apple Cash</h2>
+                <p class="text-gray-400 text-sm">Send or request cash with friends.</p>
+            </div>
+            <div class="promo-card bg-gradient-to-br from-blue-500 to-indigo-700">
+                <h2 class="text-2xl font-bold">Start using Apple Pay</h2>
+                <p class="text-white/80 text-sm">Fast, easy, and secure.</p>
+            </div>
+            <div class="promo-card bg-[#a38b6d]">
+                <h2 class="text-2xl font-bold">Passes and Tickets</h2>
+                <p class="text-white/80 text-sm">All in one place.</p>
+            </div>
+        </div>
+        <div class="dot-box">
+            <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="px-5" onclick="toggleDetails()">
+        <div class="apple-cash-card" id="hero-card">
+            <div class="p-6 flex justify-between">
+                <span class="text-3xl font-extrabold"> Cash</span>
+                <span id="preview-bal" class="text-xl font-bold text-gray-300">$0.62</span>
+            </div>
+            <div class="dots-pattern"></div>
+        </div>
+    </div>
+
+    <!-- Details Content (Hidden until click) -->
+    <div class="details-content">
+        <div class="action-bar">
+            <div class="balance-box">
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Balance</div>
+                <div class="text-4xl font-extrabold" id="main-bal">$0.62</div>
+            </div>
+            <div class="btn-pill">Send or Request</div>
+            <div class="btn-pill" onclick="openMod(event)">Add</div>
+        </div>
+
+        <div class="mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Latest Transactions</h3>
+                <span class="text-gray-500 text-sm" onclick="toggleDetails()">Close</span>
+            </div>
+            <div id="tx-list" class="space-y-4">
+                <!-- Transactions look clean, no green/red -->
+                <div class="flex items-center justify-between border-b border-[#1c1c1e] pb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#1c1c1e] rounded-full flex items-center justify-center"><i class="fab fa-apple"></i></div>
+                        <div><div class="font-bold">Apple</div><div class="text-xs text-gray-500">Sunday</div></div>
+                    </div>
+                    <div class="font-bold text-lg">$0.99</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Money Mod -->
+<div id="mod-screen">
+    <div class="flex justify-between items-center">
+        <span class="text-xl font-bold">Add Money</span>
+        <span class="text-blue-500 font-bold" onclick="closeMod()">Cancel</span>
+    </div>
+    <div class="text-6xl font-extrabold text-center my-auto" id="keypad-input">$0</div>
+    
+    <div class="keypad-grid">
+        <div class="key" onclick="numPress(1)">1</div><div class="key" onclick="numPress(2)">2</div><div class="key" onclick="numPress(3)">3</div>
+        <div class="key" onclick="numPress(4)">4</div><div class="key" onclick="numPress(5)">5</div><div class="key" onclick="numPress(6)">6</div>
+        <div class="key" onclick="numPress(7)">7</div><div class="key" onclick="numPress(8)">8</div><div class="key" onclick="numPress(9)">9</div>
+        <div class="key text-sm" onclick="setPreset(1)">$1</div><div class="key" onclick="numPress(0)">0</div><div class="key text-sm" onclick="setPreset(5)">$5</div>
+    </div>
+    <div class="bg-white text-black text-center py-4 rounded-2xl font-bold text-lg" onclick="applyMoney()">Add</div>
+</div>
+
+<script>
+    let balance = 0.62;
+    let currentInput = "";
+
+    function toggleDetails() {
+        document.body.classList.toggle('view-details');
+    }
+
+    // --- Swiping Logic (Mouse & Touch) ---
+    const slider = document.getElementById('carousel');
+    let isDown = false; let startX; let scrollLeft;
+
+    slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+    slider.addEventListener('mouseleave', () => { isDown = false; });
+    slider.addEventListener('mouseup', () => { isDown = false; });
+    slider.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+    });
+
+    slider.addEventListener('scroll', () => {
+        const index = Math.round(slider.scrollLeft / slider.offsetWidth);
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    });
+
+    // --- Mod Logic ---
+    function openMod(e) { e.stopPropagation(); document.getElementById('mod-screen').style.display = 'flex'; }
+    function closeMod() { document.getElementById('mod-screen').style.display = 'none'; currentInput = ""; updateDisplay(); }
+
+    function numPress(n) { if(currentInput.length < 4) currentInput += n; updateDisplay(); }
+    function setPreset(n) { currentInput = n.toString(); updateDisplay(); }
+    function updateDisplay() { document.getElementById('keypad-input').innerText = "$" + (currentInput || "0"); }
+
+    function applyMoney() {
+        let val = parseInt(currentInput || 0);
+        balance += val;
+        document.getElementById('main-bal').innerText = "$" + balance.toFixed(2);
+        document.getElementById('preview-bal').innerText = "$" + balance.toFixed(2);
+        
+        const txList = document.getElementById('tx-list');
+        txList.innerHTML = `
+            <div class="flex items-center justify-between border-b border-[#1c1c1e] pb-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#1c1c1e] rounded-full flex items-center justify-center"><i class="fas fa-plus"></i></div>
+                    <div><div class="font-bold">Transfer</div><div class="text-xs text-gray-500">Just Now</div></div>
+                </div>
+                <div class="font-bold text-lg">$${val.toFixed(2)}</div>
+            </div>` + txList.innerHTML;
+        
+        closeMod();
+    }
+</script>
+</body>
+</html>
